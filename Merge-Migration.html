@@ -1,0 +1,70 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <title>PowerShell - Merge-Migration - Rivet</title>
+    <link href="silk.css" type="text/css" rel="stylesheet" />
+	<link href="styles.css" type="text/css" rel="stylesheet" />
+</head>
+<body>
+
+    <ul id="SiteNav">
+		<li><a href="index.html">Get-Rivet</a></li>
+        <!--<li><a href="about_Carbon_Installation.html">-Install</a></li>-->
+		<li><a href="documentation.html">-Documentation</a></li>
+        <!--<li><a href="about_Carbon_Support.html">-Support</a></li>-->
+        <li><a href="releasenotes.html">-ReleaseNotes</a></li>
+		<li><a href="http://pshdo.com">-Blog</a></li>
+    </ul>
+
+    <h1>Merge-Migration</h1>
+<div class="Synopsis">
+<p>Creates a cumulative set of operations from migration scripts.</p>
+</div>
+
+<h2>Syntax</h2>
+<pre class="Syntax"><code>Merge-Migration [[-Migration] &lt;Migration[]&gt;] [&lt;CommonParameters&gt;]</code></pre>
+
+<h2>Description</h2>
+<div class="Description">
+<p>The <code>Merge-Migration</code> functions creates a cumulative set of migrations from migration scripts. If there are multiple operations across one or more migration scripts that touch the same database object, those changes are combined into one operation. For example, if you create a table in one migration, add a column in another migrations, then remove a column in a third migration, this function will output an operation that represents the final state for the object: a create table operation that includes the added column and doesn't include the removed column. In environments where tables are replicated, it is more efficient to modify objects once and have that change replicated once, than to have the same object modified multiple times and replicated multiple times.</p>
+
+<p>This function returns <code>Rivet.Migration</code> objects. Each object will have zero or more operations in its <code>PushOperations</code> property. If there are zero operations, it means the original operation was consolidated into another migration. Each operation has <code>Source</code> member on it, which is a list of all the migrations that contributed to that operation.</p>
+</div>
+
+<h2> Parameters </h2>
+<table id="Parameters">
+<tr>
+	<th>Name</th>
+    <th>Type</th>
+	<th>Description</th>
+	<th>Required?</th>
+	<th>Pipeline Input</th>
+	<th>Default Value</th>
+</tr>
+<tr valign='top'>
+	<td>Migration</td>
+	<td>Migration[]</td>
+	<td class="ParamDescription"><p>The path to the rivet.json file to use. By default, it will look in the current directory.</p></td>
+	<td>false</td>
+	<td>true (ByValue)</td>
+    <td></td>
+</tr>
+
+</table>
+
+<h2>Return Values</h2>
+<div class="ReturnValues">
+<p>Rivet.Migration. </p>
+</div>
+
+<h2>EXAMPLE 1</h2>
+<pre><code>Get-Migration | Merge-Migration</code></pre>
+<p>Demonstrates how to run <code>Merge-Migration</code>. It is always used in conjunction with <code>Get-Migration</code>.</p>
+
+
+	<div class="Footer">
+		Copyright 2013 - 2016 <a href="http://pshdo.com">Aaron Jensen</a>.
+	</div>
+
+</body>
+</html>

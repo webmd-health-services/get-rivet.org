@@ -1,0 +1,93 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <title>PowerShell - Remove-RowGuidCol - Rivet</title>
+    <link href="silk.css" type="text/css" rel="stylesheet" />
+	<link href="styles.css" type="text/css" rel="stylesheet" />
+</head>
+<body>
+
+    <ul id="SiteNav">
+		<li><a href="index.html">Get-Rivet</a></li>
+        <!--<li><a href="about_Carbon_Installation.html">-Install</a></li>-->
+		<li><a href="documentation.html">-Documentation</a></li>
+        <!--<li><a href="about_Carbon_Support.html">-Support</a></li>-->
+        <li><a href="releasenotes.html">-ReleaseNotes</a></li>
+		<li><a href="http://pshdo.com">-Blog</a></li>
+    </ul>
+
+    <h1>Remove-RowGuidCol</h1>
+<div class="Synopsis">
+<p>Remove the <code>rowguidcol</code> property from a column in a table.</p>
+</div>
+
+<h2>Syntax</h2>
+<pre class="Syntax"><code>Remove-RowGuidCol [-SchemaName &lt;String&gt;] [-TableName] &lt;String&gt; [-ColumnName] &lt;String&gt; [&lt;CommonParameters&gt;]</code></pre>
+
+<h2>Description</h2>
+<div class="Description">
+<p>The <code>Remove-RowGuidCol</code> operation removes the <code>rowguidcol</code> property from a <code>uniqueidentifier</code> column in a table.</p>
+
+<p>The <code>Remove-RowGuidCol</code> operation was added in Rivet 0.7.</p>
+</div>
+
+<h2>Related Commands</h2>
+
+<ul class="RelatedCommands">
+<li><a href="https://msdn.microsoft.com/en-us/library/ms190273.aspx">https://msdn.microsoft.com/en-us/library/ms190273.aspx</a></li>
+<li><a href="Add-RowGuidCol.html">Add-RowGuidCol</a></li>
+</ul>
+
+<h2> Parameters </h2>
+<table id="Parameters">
+<tr>
+	<th>Name</th>
+    <th>Type</th>
+	<th>Description</th>
+	<th>Required?</th>
+	<th>Pipeline Input</th>
+	<th>Default Value</th>
+</tr>
+<tr valign='top'>
+	<td>SchemaName</td>
+	<td><a href="http://msdn.microsoft.com/en-us/library/system.string.aspx">String</a></td>
+	<td class="ParamDescription"><p>The table's schema. Default is <code>dbo</code>.</p></td>
+	<td>false</td>
+	<td>false</td>
+    <td>dbo</td>
+</tr>
+<tr valign='top'>
+	<td>TableName</td>
+	<td><a href="http://msdn.microsoft.com/en-us/library/system.string.aspx">String</a></td>
+	<td class="ParamDescription"><p>The table's name.</p></td>
+	<td>true</td>
+	<td>false</td>
+    <td></td>
+</tr>
+<tr valign='top'>
+	<td>ColumnName</td>
+	<td><a href="http://msdn.microsoft.com/en-us/library/system.string.aspx">String</a></td>
+	<td class="ParamDescription"><p>The name of the column that should get the <code>rowguidcol</code> property.</p></td>
+	<td>true</td>
+	<td>false</td>
+    <td></td>
+</tr>
+
+</table>
+
+<h2>EXAMPLE 1</h2>
+<pre><code>Remove-RowGuidCol -TableName 'MyTable' -ColumnName 'MyUniqueIdentifier'</code></pre>
+<p>Demonstrates how to remove the <code>rowguidcol</code> property from a column in a table. In this example, the <code>dbo.MyTable</code> table's <code>MyUniqueIdentifier</code> column will lose the propery.</p>
+
+
+<h2>EXAMPLE 2</h2>
+<pre><code>Remove-RowGuidCol -SchemaName 'cstm' -TableName 'MyTable' -ColumnName 'MyUniqueIdentifier'</code></pre>
+<p>Demonstrates how to remove the <code>rowguidcol</code> property from a column in a table whose schema isn't <code>dbo</code>, in this case the <code>cstm.MyTable</code> table's <code>MyUniqueIdentifier</code> column will lose the property.</p>
+
+
+	<div class="Footer">
+		Copyright 2013 - 2016 <a href="http://pshdo.com">Aaron Jensen</a>.
+	</div>
+
+</body>
+</html>
