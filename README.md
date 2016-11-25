@@ -1,1 +1,1 @@
-# get-rivet.org
+This repository contains the [get-rivet.org](http://get-rivet.org) website.
