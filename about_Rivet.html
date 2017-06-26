@@ -18,34 +18,141 @@
 
         <h1>about_Rivet</h1>
 
-    <p>Rivet is a database migration/change management/versioning tool inspired by 
-Ruby on Rails' Migrations. It creates and applies migration scripts for SQL 
-Server databases. Migration scripts describe changes to make to your 
-database, e.g. add a table, add a column, remove an index, etc. Migrations 
-scripts should get added to your version control system so they can be 
-packaged and deployed with your application's code.    </p>
+    <p>Rivet is a database migration/change management/versioning tool inspired by Ruby
+on Rails' Migrations. You write PowerShell migration scripts that describe the 
+changes you want to make to a SQL Server database, e.g. add a table, add a 
+column, drop an index, etc. Rivet applies those scripts to a database, bringing 
+its schema up-to-date.  </p>
 
-<p>Every Rivet migration is really a PowerShell script with a special name and<br />
-that contains two migration functions.  The migration filename should have 
-the format <code>&lt;timestamp&gt;_&lt;description&gt;.ps1</code>.  Timestamp is a unique number 
-which increases every time a new migration is created.  By default, Rivet 
-uses a timestamp with second precision.  <code>Description</code> is a short description 
-of what the migration is doing.     </p>
+<p>To get started, download Rivet from the PowerShell gallery:</p>
 
-<p>There should be two functions inside a migration, <code>Push-Migration</code> and 
-<code>Pop-Migration</code>.  The <code>Push-Migration</code> function should make changes to the 
-database.  The <code>Pop-Migration</code> function should reverse those changes, so you 
-can put the database back in the state it was in before it was migrated. </p>
+<pre><code>&gt; Save-Module -Name 'Rivet' -Path '.'
+</code></pre>
 
-<p>Once released, migrations are immutable and should not be changed.  Rivet 
-keeps track of which migrations have been applied against a database.  If you 
-change a migration once it has been applied to a database, it won't get 
-re-applied because Rivet has already recorded that it was applied.  Create a 
-new migration to make the new change.</p>
+<p>This will save Rivet into a <a href="Invoke-Rivet.html">Rivet</a> directory in your current directory. (If 
+you're running PowerShell 4, you'll need to download and install <a href="https://www.microsoft.com/en-us/download/details.aspx?id=51451">PowerShell
+Package Management Modules Preview</a>.)</p>
 
-<p>All changes made in either <code>Push-Migration</code> or <code>Pop-Migration</code> are wrapped in 
-a transaction.  If any change fails to get made/applied, all changes are 
-rolled back.</p>
+<p>You can also <a href="https://github.com/webmd-health-services/Rivet/releases">download a ZIP file from the Rivet project's GitHub page</a>. Unzip the file, and
+drag the <a href="Invoke-Rivet.html">Rivet</a> directory where you'd like it.</p>
+
+<p>Next, you'll need to create a <code>rivet.json</code> file that contains a connection
+string to your database and the path where you want to keep your migration 
+scripts. The simplest configuration file looks like this:</p>
+
+<pre><code>{
+    SqlServerName: '.\Rivet',
+    DatabasesRoot: 'Databases'
+}
+</code></pre>
+
+<p>With this configuration file, Rivet will connect to the SQL Server at <code>.\Rivet</code>
+and will look for migration scripts in <code>Databases\DATABASE_NAME\Migrations</code>.</p>
+
+<p>Now you can create your first migration. Run:</p>
+
+<pre><code>&gt; .\Rivet\rivet.ps1 -New -Database DATABASE_NAME -Name 'MyFirstMigration'
+</code></pre>
+
+<p>Rivet will create a migration at 
+<code>Databases\DATABASE_NAME\Migrations\20170625132040_MyFirstMigration.ps1</code>. The 
+migration's filename has two parts: an ID (e.g. <code>20170625132040</code> followed by the
+migration's name. Rivet uses the ID to track what migrations have been applied
+to a database. </p>
+
+<p>Open the migration in your favorite PowerShell text editor. We recommend the
+PowerShell ISE, because of its intellisense and debugging capabilities. (To get
+Intellisense as you type, import Rivet first: <code>Import-Module '.\Rivet'</code>.)</p>
+
+<p>You'll see two functions: <code>Push-Migration</code> and <code>Pop-Migration</code>. In the 
+<code>Push-Migration</code> function, you'll add Rivet operations that modify your 
+database. In the <code>Pop-Migration</code> function, you'll add operations that 
+reverse/rollback the changes made in <code>Push-Migration</code>. </p>
+
+<p>Let's create a table:</p>
+
+<pre><code>function Push-Migration
+{
+    Add-Table -Name 'MyFirstTable' -Column {
+        int 'id' -Identity
+    }
+}
+
+function Pop-Migration
+{
+    Remove-Table -Name 'MyFirstTable'
+}
+</code></pre>
+
+<p>To apply your migration to your database, run <code>rivet.ps1</code> with its <code>-Push</code> 
+switch:</p>
+
+<pre><code>&gt; .\Rivet\rivet.ps1 -Push
+</code></pre>
+
+<p>Look in your database and it will contain the <code>MyFirstTable</code> table. By default, 
+pushing migrations pushes them to <em>all</em> your databases. If you only want to push
+to a single or specific databases, use Rivet's <code>Database</code> parameter:</p>
+
+<pre><code>&gt; .\Rivet\rivet.ps1 -Push -Database 'DATABASE_NAME'
+</code></pre>
+
+<p>To reverse/rolllback your migration run <code>rivet.ps1</code> with the <code>Pop</code> switch:</p>
+
+<pre><code>&gt; .\Rivet\rivet.ps1 -Pop
+</code></pre>
+
+<p>This will pop the newest migration in each database's <code>Migrations</code> directory. 
+(Use the <code>Database</code> parameter to pop the newest migration from specific 
+databases.) Look in your database, and the <code>MyFirstTable</code> database is gone.</p>
+
+<p>Next, let's add another column to our table:</p>
+
+<pre><code>function Push-Migration
+{
+    Add-Table -Name 'MyFirstTable' -Column {
+        int 'id' -Identity
+        nvarchar 'name' 50 -NotNull 
+    }        
+}
+</code></pre>
+
+<p>You didn't have to modify the <code>Pop-Migration</code> function because it removes the 
+table, so you don't need to remove each column. As you work on your migration, 
+you'll be changing your <code>Push-Migration</code> function to get it just right. You'll
+have to do a lot of pushing and popping. Rivet has a special <code>Redo</code> switch that
+does a pop followed by a push:</p>
+
+<pre><code>&gt; .\Rivet\rivet.ps1 -Redo
+</code></pre>
+
+<p>After you run this command, look in your database and you'll see that the 
+<code>MyFirstTable</code> table now has a <code>name</code> column.</p>
+
+<p>Once your migration is done, commit it to your source control repository. Once
+you make your migration available to others, <strong><em>it is immutable and should never
+be changed</em></strong>. Rivet applies migration scripts as an entire unit. It uses each
+migration's ID to determine if that migration has been applied to a database. If
+it has been applied, Rivet skips it and moves on to the next migration. So, if 
+you modify a migration after it's public, that change will never get applied
+anywhere. If you need to change a public migration, create a new migration that
+makes the changes you need.</p>
+
+<p>Rivet wraps all pushes and pops in a transaction. If any part of a migration 
+fails, the entire transaction is rolled back. Your database will never be left
+in a state where part of a migration is applied.</p>
+
+<p>To see a full list of operations, run this command:</p>
+
+<pre><code>&gt; Get-Command -Module 'Rivet'
+</code></pre>
+
+<p>Or, <a href="http://get-rivet.org/documentation.html">visit the Documentation page at the <a href="https://get-rivet.org">https://get-rivet.org</a> website</a>.</p>
+
+<p>See the <a href="about_Rivet_Configuration.html">about_Rivet_Configuration</a> topic for details on configuring Rivet in 
+the <code>rivet.json</code> file.</p>
+
+<p>The <a href="about_Rivet_Plugins.html">about_Rivet_Plugins</a> topic explains how to write your own Rivet operations.</p>
 
     <h2>See Also</h2>
     <ul>
@@ -58,7 +165,7 @@ rolled back.</p>
 
 
 	<div class="Footer">
-		Copyright 2013 - 2016 <a href="http://pshdo.com">Aaron Jensen</a>.
+		Copyright 2013 - 2017 <a href="http://pshdo.com">Aaron Jensen</a>.
 	</div>
 
 </body>
